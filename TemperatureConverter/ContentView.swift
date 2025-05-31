@@ -8,21 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var inputValue: Double = 0
+    @State private var inputValue: Double = 0   // Initialize with one of the exact keys from your ordered list
     @State private var inputUnit = "Fahrenheit"
     @State private var outputUnit = "Fahrenheit"
     @FocusState private var textFieldIsFocused: Bool
     
     let units = ["Celsius": UnitTemperature.celsius, "Fahrenheit": UnitTemperature.fahrenheit, "Kelvin": UnitTemperature.kelvin]
+    let orderedUnitKeys = ["Celsius", "Fahrenheit", "Kelvin"]
     
     var result: Double {
         guard
-            let inputUnit = units[inputUnit],
-            let outputUnit = units[outputUnit]
+            let currentInputUnit = units[inputUnit],
+            let currentOutputUnit = units[outputUnit]
         else { return 0 }
         
-        let input = Measurement(value: inputValue, unit: inputUnit)
-        let output = input.converted(to: outputUnit)
+        let input = Measurement(value: inputValue, unit: currentInputUnit)
+        let output = input.converted(to: currentOutputUnit)
         
         return output.value
     }
@@ -30,45 +31,61 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // Section for Input Unit Picker
                 Section {
                     Picker("Input Unit", selection: $inputUnit) {
-                        ForEach(Array(units.keys), id: \.self) { unit in
-                            Text(unit)
+                        ForEach(orderedUnitKeys, id: \.self) { unitKey in
+                            Text(unitKey)
                         }
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text("Input Unit")
+                    Text("Input Unit Selection")
                 }
-                Section {
-                    Picker("Input Unit", selection: $outputUnit) {
-                        ForEach(Array(units.keys), id: \.self) { unit in
-                            Text(unit)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("Output Unit")
-                }
+
+                // Section for Input Value TextField
                 Section {
                     TextField("Input Value", value: $inputValue, format: .number)
                         .keyboardType(.decimalPad)
                         .focused($textFieldIsFocused)
                 } header: {
-                    Text("Input Value")
+                    Text("Enter Value to Convert")
                 }
+
+                // Section for Output Unit Picker
+                Section {
+                    Picker("Output Unit", selection: $outputUnit) {
+                        ForEach(orderedUnitKeys, id: \.self) { unitKey in
+                            Text(unitKey)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Output Unit Selection")
+                }
+
+                // Section for Displaying the Result
                 Section {
                     Text(result, format: .number)
                 } header: {
-                    Text("Output value")
+                    Text("Converted Value")
                 }
             }
-            .navigationTitle("Uniti Conversio")
+            .navigationTitle("Temp Conversion")
             .toolbar {
-                Button("Done") {
-                    textFieldIsFocused = false
+                if textFieldIsFocused {
+                    Button("Done") {
+                        textFieldIsFocused = false
+                    }
                 }
             }
         }
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
